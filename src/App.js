@@ -1,18 +1,25 @@
-import Routes from "./routes/routes";
-import { BrowserRouter as Router } from "react-router-dom";
 import "./App.css";
 import BasicTabs from "./Components/Tabs";
 import NavBar from "./Components/Navbar";
+import Home from './Home'
+import OnboardUser from './onboarding/onboardmodal';
+
+import { GlobalContextProvider } from './context';
 
 function App() {
   return (
     <div className="App">
-      <div>
-        <NavBar />
-      </div>
-      <div>
-        <BasicTabs />
-      </div>
+      <GlobalContextProvider>
+        <OnboardUser/>
+
+        <div>
+          <NavBar />
+        </div>
+
+        <div>
+          <BasicTabs />
+        </div>
+      </GlobalContextProvider>
     </div>
   );
 }
