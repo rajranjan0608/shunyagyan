@@ -5,7 +5,6 @@ import {
     DATA_CONTRACT_ABI,
     DATA_CONTRACT_ADDRESS,
     ADDRESSES,
-    ABIS
 } from '../contract';
 import { GetParams } from '../onboarding/onboard';
 
@@ -47,7 +46,7 @@ export const GlobalContextProvider = ({ children }) => {
         const signer = newProvider?.getSigner();
         const newContract = new ethers.Contract(ADDRESSES[chainId], DATA_CONTRACT_ABI, signer);
 
-        const newDataProvider = new ethers.providers.JsonRpcProvider('https://rpc-mumbai.maticvigil.com');
+        const newDataProvider = new ethers.providers.JsonRpcProvider('https://matic-mumbai.chainstacklabs.com');
         const dataSigner = newDataProvider?.getSigner(account);
         const newDataContract = new ethers.Contract(DATA_CONTRACT_ADDRESS, DATA_CONTRACT_ABI, dataSigner)
 
@@ -77,7 +76,9 @@ export const GlobalContextProvider = ({ children }) => {
 
     async function getChallenges() {
         const challenges = await dataContract?.getChallenges(account)
-        setChallenges(challenges)
+        if(challenges && challenges?.length > 1) {
+            setChallenges(challenges[1])
+        }
     }
 
     return (

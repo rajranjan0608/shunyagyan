@@ -17,15 +17,20 @@ import { Dialog, DialogContent, DialogTitle } from '@mui/material';
 import { useGlobalContext } from '../../context';
 
 export default function Challenges(props) {
-  const [challenges, setChallenges] = useState(showChallenges);
   const [openModal, setOpenModal] = React.useState(false);
   const [selectedRow, setSelecetedStateRow] = useState({});
-  const { account } = useGlobalContext();
+  const { account, challenges, contract } = useGlobalContext();
+  console.log('Challenges:', challenges)
 
   const renderTheModal = (row) => {
     setOpenModal(row.status == 'Accepted' && true);
     setSelecetedStateRow(row);
   };
+
+  const acceptInvite = async (challengeId, acceptOrReject) => {
+    await contract.respond(challengeId, acceptOrReject)
+  }
+
   const renderRow = (row) => {
     return (
       <TableRow
@@ -38,13 +43,19 @@ export default function Challenges(props) {
         <TableCell align='center'>{row.opponent}</TableCell>
         <TableCell align='center'>{row.status}</TableCell>
         <TableCell align='center'>
-          {row.status == 'Accepted' ? (
-            <ArrowOutwardIcon onClick={() => renderTheModal(row)} />
-          ) : (
+          {
+            row.status == 'Accepted'
+            ?
+              <ArrowOutwardIcon onClick={() => renderTheModal(row)} />
+            :
+            row.opponent != account
+            ?
             <Tooltip title='Game not intiated!' placement='right-start'>
               <DoNotDisturbSharpIcon />
             </Tooltip>
-          )}
+            :
+            <button onClick={() => acceptInvite(row.challengeId, true)}>Accept Invite</button>
+          }
         </TableCell>
       </TableRow>
     );
