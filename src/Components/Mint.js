@@ -1,21 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { Box } from '@mui/system';
 import { Button } from '@mui/material';
-import AddCircleIcon from '@mui/icons-material/AddCircle';
 import ActionNFTCard from './Card';
+import ChallengeUser from './ChallengeUser';
+import { useGlobalContext } from '../context';
 import _map from 'lodash/map';
 
 export default function Mint(props) {
-  const { connectedNetwork, existingCards } = props;
-  // const [existingCards, setExistingCards] = useState(existingCards);
+  const { connectedNetwork } = props;
+  const { cards, contract } = useGlobalContext()
+  const [modalIsOpen, setIsOpen] = useState(false);
 
-  // useEffect(() => {
-  //   //there will be an API call through which we will set the existing cards
-  //   setExistingCards();
-  // }, []);
-
-  const mintNewCard = () => {
-    //TO DO: to mint new card
+  const mintNewCard = async () => {
+    await contract.mint()
   };
 
   // const addNewCard = (newCardData) => {
@@ -24,17 +21,20 @@ export default function Mint(props) {
 
   const renderCard = (cardDetails) => {
     return (
-      <div key={cardDetails.cardId}>
+      <div key={cardDetails.tokenId}>
         <ActionNFTCard cardDetails ={cardDetails} />
       </div>
     );
   };
 
-  const onChallengeUsers = () => {};
+  const onChallengeUsers = () => {
+    setIsOpen(true)
+  };
 
   return (
     <div>
       <div>
+        <ChallengeUser modalIsOpen={modalIsOpen} setIsOpen={setIsOpen}/>
         <Box
           component='div'
           sx={{
@@ -61,7 +61,7 @@ export default function Mint(props) {
         </Box>
       </div>
       <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', justifyContent:'space-evenly' }}>
-        {_map(existingCards, renderCard)}
+        {_map(cards, renderCard)}
       </div>
       <div>
         <Button

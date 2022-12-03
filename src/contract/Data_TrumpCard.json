@@ -1,6 +1,11 @@
 {
     "abi": [
         {
+            "inputs": [],
+            "stateMutability": "nonpayable",
+            "type": "constructor"
+        },
+        {
             "anonymous": false,
             "inputs": [
                 {
@@ -76,6 +81,32 @@
             "type": "event"
         },
         {
+            "inputs": [],
+            "name": "CHANNEL_ADDRESS",
+            "outputs": [
+                {
+                    "internalType": "address",
+                    "name": "",
+                    "type": "address"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "EPNS_COMM_ADDRESS",
+            "outputs": [
+                {
+                    "internalType": "address",
+                    "name": "",
+                    "type": "address"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
             "inputs": [
                 {
                     "internalType": "address",
@@ -92,190 +123,6 @@
             "outputs": [],
             "stateMutability": "nonpayable",
             "type": "function"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "address",
-                    "name": "_user",
-                    "type": "address"
-                }
-            ],
-            "name": "challenge_user",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function"
-        },
-        {
-            "inputs": [],
-            "name": "mint",
-            "outputs": [
-                {
-                    "internalType": "uint256",
-                    "name": "",
-                    "type": "uint256"
-                }
-            ],
-            "stateMutability": "nonpayable",
-            "type": "function"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "uint256",
-                    "name": "_challengeId",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "bool",
-                    "name": "_res",
-                    "type": "bool"
-                }
-            ],
-            "name": "respond",
-            "outputs": [
-                {
-                    "components": [
-                        {
-                            "internalType": "address",
-                            "name": "challenger",
-                            "type": "address"
-                        },
-                        {
-                            "internalType": "address",
-                            "name": "opponent",
-                            "type": "address"
-                        },
-                        {
-                            "internalType": "enum TrumpCards.Response",
-                            "name": "status",
-                            "type": "uint8"
-                        },
-                        {
-                            "internalType": "uint256",
-                            "name": "challenger_card",
-                            "type": "uint256"
-                        },
-                        {
-                            "internalType": "uint256",
-                            "name": "opponent_card",
-                            "type": "uint256"
-                        },
-                        {
-                            "internalType": "uint8",
-                            "name": "attr_called",
-                            "type": "uint8"
-                        },
-                        {
-                            "internalType": "address",
-                            "name": "winner",
-                            "type": "address"
-                        }
-                    ],
-                    "internalType": "struct TrumpCards.Challenge",
-                    "name": "",
-                    "type": "tuple"
-                }
-            ],
-            "stateMutability": "nonpayable",
-            "type": "function"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "address",
-                    "name": "from",
-                    "type": "address"
-                },
-                {
-                    "internalType": "address",
-                    "name": "to",
-                    "type": "address"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "tokenId",
-                    "type": "uint256"
-                }
-            ],
-            "name": "safeTransferFrom",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "address",
-                    "name": "from",
-                    "type": "address"
-                },
-                {
-                    "internalType": "address",
-                    "name": "to",
-                    "type": "address"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "tokenId",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "bytes",
-                    "name": "data",
-                    "type": "bytes"
-                }
-            ],
-            "name": "safeTransferFrom",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "address",
-                    "name": "operator",
-                    "type": "address"
-                },
-                {
-                    "internalType": "bool",
-                    "name": "approved",
-                    "type": "bool"
-                }
-            ],
-            "name": "setApprovalForAll",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "address",
-                    "name": "from",
-                    "type": "address"
-                },
-                {
-                    "internalType": "address",
-                    "name": "to",
-                    "type": "address"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "tokenId",
-                    "type": "uint256"
-                }
-            ],
-            "name": "transferFrom",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function"
-        },
-        {
-            "inputs": [],
-            "stateMutability": "nonpayable",
-            "type": "constructor"
         },
         {
             "inputs": [
@@ -333,6 +180,19 @@
         {
             "inputs": [
                 {
+                    "internalType": "address",
+                    "name": "_user",
+                    "type": "address"
+                }
+            ],
+            "name": "challengeUser",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
                     "internalType": "uint256",
                     "name": "",
                     "type": "uint256"
@@ -351,23 +211,23 @@
                     "type": "address"
                 },
                 {
-                    "internalType": "enum TrumpCards.Response",
+                    "internalType": "enum Response",
                     "name": "status",
                     "type": "uint8"
                 },
                 {
                     "internalType": "uint256",
-                    "name": "challenger_card",
+                    "name": "challengerCard",
                     "type": "uint256"
                 },
                 {
                     "internalType": "uint256",
-                    "name": "opponent_card",
+                    "name": "opponentCard",
                     "type": "uint256"
                 },
                 {
                     "internalType": "uint8",
-                    "name": "attr_called",
+                    "name": "attrCalled",
                     "type": "uint8"
                 },
                 {
@@ -467,23 +327,23 @@
                             "type": "address"
                         },
                         {
-                            "internalType": "enum TrumpCards.Response",
+                            "internalType": "enum Response",
                             "name": "status",
                             "type": "uint8"
                         },
                         {
                             "internalType": "uint256",
-                            "name": "challenger_card",
+                            "name": "challengerCard",
                             "type": "uint256"
                         },
                         {
                             "internalType": "uint256",
-                            "name": "opponent_card",
+                            "name": "opponentCard",
                             "type": "uint256"
                         },
                         {
                             "internalType": "uint8",
-                            "name": "attr_called",
+                            "name": "attrCalled",
                             "type": "uint8"
                         },
                         {
@@ -492,7 +352,7 @@
                             "type": "address"
                         }
                     ],
-                    "internalType": "struct TrumpCards.Challenge[]",
+                    "internalType": "struct Challenge[]",
                     "name": "",
                     "type": "tuple[]"
                 }
@@ -526,6 +386,19 @@
         },
         {
             "inputs": [],
+            "name": "mint",
+            "outputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [],
             "name": "name",
             "outputs": [
                 {
@@ -554,6 +427,136 @@
                 }
             ],
             "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "_challengeId",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "bool",
+                    "name": "_res",
+                    "type": "bool"
+                }
+            ],
+            "name": "respond",
+            "outputs": [
+                {
+                    "components": [
+                        {
+                            "internalType": "address",
+                            "name": "challenger",
+                            "type": "address"
+                        },
+                        {
+                            "internalType": "address",
+                            "name": "opponent",
+                            "type": "address"
+                        },
+                        {
+                            "internalType": "enum Response",
+                            "name": "status",
+                            "type": "uint8"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "challengerCard",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "opponentCard",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "uint8",
+                            "name": "attrCalled",
+                            "type": "uint8"
+                        },
+                        {
+                            "internalType": "address",
+                            "name": "winner",
+                            "type": "address"
+                        }
+                    ],
+                    "internalType": "struct Challenge",
+                    "name": "",
+                    "type": "tuple"
+                }
+            ],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "from",
+                    "type": "address"
+                },
+                {
+                    "internalType": "address",
+                    "name": "to",
+                    "type": "address"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "tokenId",
+                    "type": "uint256"
+                }
+            ],
+            "name": "safeTransferFrom",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "from",
+                    "type": "address"
+                },
+                {
+                    "internalType": "address",
+                    "name": "to",
+                    "type": "address"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "tokenId",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "bytes",
+                    "name": "data",
+                    "type": "bytes"
+                }
+            ],
+            "name": "safeTransferFrom",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "operator",
+                    "type": "address"
+                },
+                {
+                    "internalType": "bool",
+                    "name": "approved",
+                    "type": "bool"
+                }
+            ],
+            "name": "setApprovalForAll",
+            "outputs": [],
+            "stateMutability": "nonpayable",
             "type": "function"
         },
         {
@@ -674,6 +677,29 @@
                 }
             ],
             "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "from",
+                    "type": "address"
+                },
+                {
+                    "internalType": "address",
+                    "name": "to",
+                    "type": "address"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "tokenId",
+                    "type": "uint256"
+                }
+            ],
+            "name": "transferFrom",
+            "outputs": [],
+            "stateMutability": "nonpayable",
             "type": "function"
         }
     ]

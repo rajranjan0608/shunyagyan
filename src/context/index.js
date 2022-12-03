@@ -1,7 +1,12 @@
 import { ethers } from 'ethers'
 import { useState, useContext, createContext, useEffect } from 'react';
 
-import { ABI, ADDRESS } from '../contract';
+import {
+    DATA_CONTRACT_ABI,
+    DATA_CONTRACT_ADDRESS,
+    ADDRESSES,
+    ABIS
+} from '../contract';
 import { GetParams } from '../onboarding/onboard';
 
 const GlobalContext = createContext();
@@ -9,8 +14,10 @@ const GlobalContext = createContext();
 export const GlobalContextProvider = ({ children }) => {
     const [provider, setProvider] = useState(undefined)
     const [contract, setContract] = useState(undefined)
+    const [dataContract, setDataContract] = useState(undefined)
     const [account, setAccount] = useState('0x0')
-    const [step, setStep] = useState(-1)
+    const [chainId, setChainId] = useState('')
+    const [step, setStep] = useState(0)
     const [cards, setCards] = useState([])
     const [challenges, setChallenges] = useState([])
 
@@ -18,7 +25,8 @@ export const GlobalContextProvider = ({ children }) => {
     async function resetParams() {
         const params = await GetParams();
         setStep(params.step);
-        setAccount(params.account)
+        setChainId(params.chainId);
+        setAccount(params.account);
     }
 
     useEffect(() => {
@@ -36,32 +44,39 @@ export const GlobalContextProvider = ({ children }) => {
     // setup contract and provider
     function setupContract() {
         const newProvider = new ethers.providers.Web3Provider(window.ethereum);
-        const signer = newProvider.getSigner();
-        const newContract = new ethers.Contract(ADDRESS, ABI, signer);
+        const signer = newProvider?.getSigner();
+        const newContract = new ethers.Contract(ADDRESSES[chainId], DATA_CONTRACT_ABI, signer);
+
+        const newDataProvider = new ethers.providers.JsonRpcProvider('https://rpc-mumbai.maticvigil.com');
+        const dataSigner = newDataProvider?.getSigner(account);
+        const newDataContract = new ethers.Contract(DATA_CONTRACT_ADDRESS, DATA_CONTRACT_ABI, dataSigner)
 
         setProvider(newProvider);
         setContract(newContract);
+        setDataContract(newDataContract);
     }
 
     useEffect(() => {
-        setupContract()
-    }, [])
+        if(step === -1) {
+            setupContract()
+        }
+    }, [step])
 
-    // Fetch user details
+    // Fetch user details - Read data from Polygon
     useEffect(() => {
-        if(contract && account !== '0x0') {
+        if(provider && dataContract && account !== '0x0') {
             getCards()
             getChallenges()
         }
-    }, [contract, account])
+    }, [dataContract, account, provider])
 
     async function getCards() {
-        const cards = await contract?.getCards(account)
+        const cards = await dataContract?.getCards(account)
         setCards(cards)
     }
 
     async function getChallenges() {
-        const challenges = await contract?.getChallenges(account)
+        const challenges = await dataContract?.getChallenges(account)
         setChallenges(challenges)
     }
 

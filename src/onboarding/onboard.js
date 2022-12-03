@@ -76,6 +76,7 @@ export const GetParams = async () => {
         step: -1,
         balance: 0,
         account: '0x0',
+        chainId: '0x'
     };
 
     if (!isEthereum()) {
@@ -96,6 +97,7 @@ export const GetParams = async () => {
         response.step = 2;
         return response;
     }
+    response.chainId = chain.chainId
 
     const { currentBalance, err } = await requestBalance(currentAccount);
     if (err) {

@@ -6,7 +6,7 @@
         "decimals": 18,
         "rpcUrls": ["https://rpc-mumbai.maticvigil.com/"],
         "blockExplorerUrls": ["https://polygonscan.com/"],
-        "minimumWalletBalance": 0.3
+        "minimumWalletBalance": 0
     },
     {
         "chainId": "0x507",
@@ -15,7 +15,7 @@
         "decimals": 18,
         "rpcUrls": ["https://moonbase-alpha.public.blastapi.io"],
         "blockExplorerUrls": ["https://moonbase-blockscout.testnet.moonbeam.network/"],
-        "minimumWalletBalance": 0.3
+        "minimumWalletBalance": 0
     },
     {
         "chainId": "0xA869",
@@ -24,6 +24,6 @@
         "decimals": 18,
         "rpcUrls": ["https://api.avax-test.network/ext/bc/C/rpc"],
         "blockExplorerUrls": ["https://testnet.snowtrace.io"],
-        "minimumWalletBalance": 0.3
+        "minimumWalletBalance": 0
     }
 ]

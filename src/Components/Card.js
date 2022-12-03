@@ -4,31 +4,36 @@ import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
 import Typography from '@mui/material/Typography';
 import { CardActionArea } from '@mui/material';
-import _map from 'lodash/map';
 
 export default function ActionNFTCard(props) {
-  console.log("props- ", props);
+  const { tokenId, attack, defense, stamina } = props.cardDetails;
 
-  const { name, image, properties } = props.cardDetails;
+  console.log(parseInt(Math.random() * 100 % 2))
 
-  const makeProperties = (property) => {
-    console.log('here!');
-    return (
-      <li key={property.key}>
-        <b>{property.key} :</b>
-        <span>{property.value}</span>
-      </li>
-    );
-  };
   return (
     <Card sx={{ maxWidth: 200 }} style={{ margin: '20px', padding: '20px' ,backgroundColor: ''}}>
       <CardActionArea>
-        <CardMedia component='img' height='140' image={image} alt={name} />
+        <CardMedia component='img' height='140' image = {`/image/nft${parseInt(Math.random() * 100 % 2)}.jpeg`} alt={tokenId.toString()} />
         <CardContent>
           <Typography gutterBottom variant='h5' component='div'>
-            {name}
+            ID: {tokenId.toString()}
           </Typography>
-          <ul>{_map(properties, makeProperties)}</ul>
+          <ul>
+            <li key='attack'>
+              <b>Attack:</b>
+              <span>{attack.toString()}</span>
+            </li>
+
+            <li key='defense'>
+              <b>Defense:</b>
+              <span>{defense.toString()}</span>
+            </li>
+
+            <li key='Stamina'>
+              <b>Stamina:</b>
+              <span>{stamina.toString()}</span>
+            </li>
+          </ul>
         </CardContent>
       </CardActionArea>
     </Card>

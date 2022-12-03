@@ -76,7 +76,7 @@ const OnboardModal = () => {
 
             default:
                 return (
-                    <p>Good to go!</p>
+                    <span>Good to go!</span>
                 );
         }
     };
