@@ -4,6 +4,14 @@ pragma solidity ^0.8.4;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 
+interface IPUSHCommInterface {
+    function sendNotification(
+        address _channel,
+        address _recipient,
+        bytes calldata _identity
+    ) external;
+}
+
 contract TrumpCards is ERC721Enumerable {
     struct Attributes {
         uint256 tokenId;
@@ -34,6 +42,9 @@ contract TrumpCards is ERC721Enumerable {
 
     uint256 public totalChallenges;
 
+    address public CHANNEL_ADDRESS = 0x40D6D9B3783fd23E831ecdCd2dF7FDeE13819DbF; //channel address
+    address public EPNS_COMM_ADDRESS = 0xb3971BCef2D791bc4027BbfedFb47319A4AAaaAa; //EPNS communication contract address, polygon mumbai
+
     constructor() ERC721("TrumpCards", "TCRD") {}
 
     function mint() external returns (uint256) {
@@ -60,7 +71,33 @@ contract TrumpCards is ERC721Enumerable {
         );
 
         challenges[challengeId] = challenge;
+
         // Emit Push event to alert opponent
+        IPUSHCommInterface(EPNS_COMM_ADDRESS).sendNotification(
+            CHANNEL_ADDRESS, // from channel
+            _user, // to recipient, put address(this) in case you want Broadcast or Subset. For Targetted put the address to which you want to send
+            bytes(
+                string(
+                    // We are passing identity here: https://docs.epns.io/developers/developer-guides/sending-notifications/advanced/notification-payload-types/identity/payload-identity-implementations
+                    abi.encodePacked(
+                        "0", // this is notification identity: https://docs.epns.io/developers/developer-guides/sending-notifications/advanced/notification-payload-types/identity/payload-identity-implementations
+                        "+", // segregator
+                        "3", // this is payload type: https://docs.epns.io/developers/developer-guides/sending-notifications/advanced/notification-payload-types/payload (1, 3 or 4) = (Broadcast, targetted or subset)
+                        "+", // segregator
+                        "Challenge Alert!!!", // this is notificaiton title
+                        "+", // segregator,
+                        "Challenge ID: ", //notification body
+                        uint2str(challengeId), //notification body
+                        "\n", //notification body
+                        "Address(", //notification body
+                        addressToString(msg.sender), // notification body
+                        ")", //notification body
+                        " CHALLENGED YOU", // notification body
+                        " FOR A MATCH!" // notification body
+                    )
+                )
+            )
+        );
     }
 
     function respond(uint256 _challengeId, bool _res)
@@ -78,6 +115,31 @@ contract TrumpCards is ERC721Enumerable {
         if (_res == false) {
             challenge.status = Response.Rejected;
             // Emit update?
+        IPUSHCommInterface(EPNS_COMM_ADDRESS).sendNotification(
+            CHANNEL_ADDRESS, // from channel
+            challenge.challenger, // to recipient, put address(this) in case you want Broadcast or Subset. For Targetted put the address to which you want to send
+            bytes(  
+                string(
+                    // We are passing identity here: https://docs.epns.io/developers/developer-guides/sending-notifications/advanced/notification-payload-types/identity/payload-identity-implementations
+                    abi.encodePacked(
+                        "0", // this is notification identity: https://docs.epns.io/developers/developer-guides/sending-notifications/advanced/notification-payload-types/identity/payload-identity-implementations
+                        "+", // segregator
+                        "3", // this is payload type: https://docs.epns.io/developers/developer-guides/sending-notifications/advanced/notification-payload-types/payload (1, 3 or 4) = (Broadcast, targetted or subset)
+                        "+", // segregator
+                        "Challenge Response!!!", // this is notificaiton title
+                        "+", // segregator,
+                        "Challenge ID: ", //notification body
+                        uint2str(_challengeId), //notification body
+                        "\n", //notification body
+                        "Address(", //notification body
+                        addressToString(msg.sender), // notification body
+                        ")", //notification body
+                        " REJECTED YOUR", // notification body
+                        " CHALLENGE!!" // notification body
+                    )
+                )
+            )
+        );            
             return challenge;
         }
 
@@ -113,6 +175,31 @@ contract TrumpCards is ERC721Enumerable {
 
         challenge.status = Response.Accepted;
         // Emit update
+        IPUSHCommInterface(EPNS_COMM_ADDRESS).sendNotification(
+            CHANNEL_ADDRESS, // from channel
+            challenge.challenger, // to recipient, put address(this) in case you want Broadcast or Subset. For Targetted put the address to which you want to send
+            bytes(
+                string(
+                    // We are passing identity here: https://docs.epns.io/developers/developer-guides/sending-notifications/advanced/notification-payload-types/identity/payload-identity-implementations
+                    abi.encodePacked(
+                        "0", // this is notification identity: https://docs.epns.io/developers/developer-guides/sending-notifications/advanced/notification-payload-types/identity/payload-identity-implementations
+                        "+", // segregator
+                        "3", // this is payload type: https://docs.epns.io/developers/developer-guides/sending-notifications/advanced/notification-payload-types/payload (1, 3 or 4) = (Broadcast, targetted or subset)
+                        "+", // segregator
+                        "Challenge Response!!!", // this is notificaiton title
+                        "+", // segregator,
+                        "Challenge ID: ", //notification body
+                        uint2str(_challengeId), //notification body
+                        "\n", //notification body
+                        "Address(", //notification body
+                        addressToString(msg.sender), // notification body
+                        ")", //notification body
+                        " ACCEPTED YOUR", // notification body
+                        " CHALLENGE!!" // notification body
+                    )
+                )
+            )
+        );        
         return challenge;
     }
 
@@ -186,5 +273,30 @@ contract TrumpCards is ERC721Enumerable {
         // 4. Select attribute to decide winner
 
         return (0, 0, 0);
+    }
+
+    function addressToString(address _address)
+        internal
+        pure
+        returns (string memory)
+    {
+        bytes32 _bytes = bytes32(uint256(uint160(_address)));
+        bytes memory HEX = "0123456789abcdef";
+        bytes memory _string = new bytes(42);
+        _string[0] = "0";
+        _string[1] = "x";
+        for (uint256 i = 0; i < 20; i++) {
+            _string[2 + i * 2] = HEX[uint8(_bytes[i + 12] >> 4)];
+            _string[3 + i * 2] = HEX[uint8(_bytes[i + 12] & 0x0f)];
+        }
+        return string(_string);
+    }
+
+    function uint2str(uint256 _i)
+        internal
+        pure
+        returns (string memory _uintAsString)
+    {
+        return Strings.toString(_i);
     }
 }
