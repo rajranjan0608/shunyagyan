@@ -6,6 +6,8 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Mint from './Mint';
 import { dataToDisplay } from './TestData';
+import Challenges from './Challenges/Challenges';
+import { Dialog, DialogTitle } from '@mui/material';
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -73,9 +75,10 @@ export default function BasicTabs() {
           <Mint connectedNetwork='Polygon' existingCards={dataToDisplay} />
         </TabPanel>
         <TabPanel value={value} index={1}>
-          Item Two
+          <Challenges />
         </TabPanel>
       </Box>
+      
     </Box>
   );
 }

@@ -21,14 +21,19 @@ export const dataToDisplay = [
   },
 ];
 
-export const showChallenges =[
+export const showChallenges = [
   {
-    "challenger":"0x23djbh929ui292",
-    "opponnent" :"0x3urhuhsubuh880",
-    "status" : "Accepted",
-    "challengerCard":"0x23djbh929ok908",
-    "opponentCard":"0x90ioph929ok888",
-    "attr_called":"attack",
-    "winner":"0x3urhuhsubuh880"
-  }
+    challenger: '0x23djbh929ui292',
+    opponent: '0x3urhuhsubuh880',
+    status: 'Accepted',
+    challengerCard: '0x23djbh929ok908',
+    opponentCard: '0x90ioph929ok888',
+    attr_called: 'attack',
+    winner: '0x3urhuhsubuh880',
+  },
+  {
+    challenger: '0x23djbh929uer292',
+    opponent: '0x3urhuhsubuhtr880',
+    status: 'Pending',
+  },
 ];

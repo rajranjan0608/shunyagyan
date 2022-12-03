@@ -3,7 +3,7 @@ import { useGlobalContext } from './context';
 
 // Sample to use contracts
 export default function Home() {
-    const { provider, contract, cards } = useGlobalContext()
+    const { provider, contract, cards,account } = useGlobalContext()
     useEffect(() => {
         console.log('cards:', cards)
         if(cards && cards.length > 0) {
