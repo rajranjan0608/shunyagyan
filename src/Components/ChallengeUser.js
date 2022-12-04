@@ -16,7 +16,7 @@ export default function ChallengeUser({ modalIsOpen, setIsOpen }) {
     }
     
     async function onChallengeUser() {
-        await contract.challengeUser(userAddress)
+        await contract.challenge_user(userAddress)
     }
 
     return (

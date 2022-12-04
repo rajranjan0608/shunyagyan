@@ -16,6 +16,7 @@ export const GlobalContextProvider = ({ children }) => {
     const [dataContract, setDataContract] = useState(undefined)
     const [account, setAccount] = useState('0x0')
     const [chainId, setChainId] = useState('')
+    const [chainName, setChainName] = useState('')
     const [step, setStep] = useState(0)
     const [cards, setCards] = useState([])
     const [challenges, setChallenges] = useState([])
@@ -24,6 +25,7 @@ export const GlobalContextProvider = ({ children }) => {
     async function resetParams() {
         const params = await GetParams();
         setStep(params.step);
+        setChainName(params.chainName);
         setChainId(params.chainId);
         setAccount(params.account);
     }
@@ -86,6 +88,7 @@ export const GlobalContextProvider = ({ children }) => {
             provider,
             contract,
             account,
+            chainName,
             cards,
             challenges
         }}>

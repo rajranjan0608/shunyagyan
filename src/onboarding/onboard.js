@@ -76,6 +76,7 @@ export const GetParams = async () => {
         step: -1,
         balance: 0,
         account: '0x0',
+        chainName: '',
         chainId: '0x'
     };
 
@@ -98,6 +99,7 @@ export const GetParams = async () => {
         return response;
     }
     response.chainId = chain.chainId
+    response.chainName = chain.chainName
 
     const { currentBalance, err } = await requestBalance(currentAccount);
     if (err) {

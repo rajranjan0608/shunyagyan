@@ -6,10 +6,13 @@ import ChallengeUser from './ChallengeUser';
 import { useGlobalContext } from '../context';
 import _map from 'lodash/map';
 
-export default function Mint(props) {
-  const { connectedNetwork } = props;
-  const { cards, contract } = useGlobalContext()
+export default function Mint() {
+  const { cards, contract, chainName } = useGlobalContext()
   const [modalIsOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    console.log(chainName)
+  }, [chainName])
 
   const mintNewCard = async () => {
     await contract.mint()
@@ -46,9 +49,6 @@ export default function Mint(props) {
             marginRight: '30px',
           }}
         >
-          <div>
-            <span>Connected to : {connectedNetwork} </span>
-          </div>
           <div>
             <Button
               variant='contained'

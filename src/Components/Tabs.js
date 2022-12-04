@@ -5,9 +5,8 @@ import Tab from '@mui/material/Tab';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Mint from './Mint';
-import { dataToDisplay } from './TestData';
 import Challenges from './Challenges/Challenges';
-import { Dialog, DialogTitle } from '@mui/material';
+import { useGlobalContext } from '../context';
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -37,6 +36,7 @@ TabPanel.propTypes = {
 
 export default function BasicTabs() {
   const [value, setValue] = React.useState(0);
+  const { chainName } = useGlobalContext()
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -72,7 +72,7 @@ export default function BasicTabs() {
           </Tabs>
         </Box>
         <TabPanel value={value} index={0}>
-          <Mint connectedNetwork='Polygon' existingCards={dataToDisplay} />
+          <Mint connectedNetwork={chainName}/>
         </TabPanel>
         <TabPanel value={value} index={1}>
           <Challenges />

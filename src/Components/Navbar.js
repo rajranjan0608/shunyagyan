@@ -6,10 +6,10 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import { Button } from '@mui/material';
 
-
+import { useGlobalContext } from '../context';
 
 export default function NavBar() {
-
+  const { chainName } = useGlobalContext()
   const[metamaskConnected, setMetamaskConnected] = React.useState(false);
 
   const connectToMetaMask =() =>{
@@ -35,8 +35,8 @@ export default function NavBar() {
           <Button variant="contained" 
                   onClick={connectToMetaMask} 
                   style={{ background: 'Black' }}>
-                    Connect To Metamask
-         </Button>
+                    Current Network: {chainName}
+          </Button>
         </Toolbar>
       </AppBar>
     </Box>

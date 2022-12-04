@@ -22,8 +22,13 @@ export default function Challenges(props) {
   const { account, challenges, contract } = useGlobalContext();
   console.log('Challenges:', challenges)
 
+  const Status = {
+    Pending: 0,
+    Accepted: 1
+  }
+
   const renderTheModal = (row) => {
-    setOpenModal(row.status == 'Accepted' && true);
+    setOpenModal(row.status == Status.Accepted && true);
     setSelecetedStateRow(row);
   };
 
@@ -32,6 +37,7 @@ export default function Challenges(props) {
   }
 
   const renderRow = (row) => {
+    console.log(row.opponent, account)
     return (
       <TableRow
         key={row.name}
@@ -41,14 +47,14 @@ export default function Challenges(props) {
           {row.challenger}
         </TableCell>
         <TableCell align='center'>{row.opponent}</TableCell>
-        <TableCell align='center'>{row.status}</TableCell>
+        <TableCell align='center'>{row.status == 1 ? 'Accepted' : 'Pending'}</TableCell>
         <TableCell align='center'>
           {
-            row.status == 'Accepted'
+            row.status == Status.Accepted
             ?
               <ArrowOutwardIcon onClick={() => renderTheModal(row)} />
             :
-            row.opponent != account
+            row.opponent?.toLowerCase() != account.toLowerCase()
             ?
             <Tooltip title='Game not intiated!' placement='right-start'>
               <DoNotDisturbSharpIcon />
