@@ -64,7 +64,8 @@ contract TrumpCards is ERC721Enumerable, ITrumpCards {
         external
         returns (Attributes memory)
     {
-        require(cards[_tokenId].attack != 0, "Card already revealed");
+        // BUG FIXED!!
+        require(cards[_tokenId].attack == 0, "Card already revealed");
 
         // It would be A' (ICA) address and not the actual address
         address ICA = IAR.getInterchainAccount(
@@ -77,9 +78,9 @@ contract TrumpCards is ERC721Enumerable, ITrumpCards {
             "Caller is not the authorised randomizer provider"
         );
 
-        uint256 attack = (rand >> 128) % 1000;
-        uint256 defense = (rand / (1 << 128)) % 1000;
-        uint256 stamina = (attack ^ defense) % 1000;
+        uint256 attack = (rand >> 128);
+        uint256 defense = (rand / (1 << 128));
+        uint256 stamina = (attack ^ defense);
 
         cards[_tokenId] = Attributes(
             _tokenId,

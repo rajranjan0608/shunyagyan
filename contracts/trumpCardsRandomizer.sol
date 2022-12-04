@@ -21,9 +21,9 @@ contract TrumpCardsRandomizer is RandomnessConsumer, Ownable {
 
     Randomness.RandomnessSource randomnessSource;
 
-    mapping(uint256 => uint256) requestIdToRandom;
-    mapping(uint256 => uint256) tokenIdToRequestId;
-    mapping(uint256 => uint256) challengeIdToRequestId;
+    mapping(uint256 => uint256) public requestIdToRandom;
+    mapping(uint256 => uint256) public tokenIdToRequestId;
+    mapping(uint256 => uint256) public challengeIdToRequestId;
 
     struct Config {
         uint64 FULFILLMENT_GAS_LIMIT;
@@ -42,7 +42,7 @@ contract TrumpCardsRandomizer is RandomnessConsumer, Ownable {
     {
         randomnessSource = source;
 
-        config.FULFILLMENT_GAS_LIMIT = 100000;
+        config.FULFILLMENT_GAS_LIMIT = 1500000;  // UPDATED
         config.NUMBER_OF_WORDS = 1;
         config.VRF_BLOCKS_DELAY = MIN_VRF_BLOCKS_DELAY;
     }
@@ -129,15 +129,17 @@ contract TrumpCardsRandomizer is RandomnessConsumer, Ownable {
     }
 
     function _initiateRandom() internal returns (uint256 requestId) {
-        require(
-            msg.value > randomness.requiredDeposit() + 1_000_000 gwei,
-            "Deposit + Tx fees requirement not met"
-        );
-        uint256 fee = msg.value - randomness.requiredDeposit();
+        // require(
+        //     msg.value > randomness.requiredDeposit() + 1_000_000 gwei,
+        //     "Deposit + Tx fees requirement not met"
+        // );
+        // uint256 fee = msg.value - randomness.requiredDeposit();
+
+        uint256 fee = config.FULFILLMENT_GAS_LIMIT * 5 gwei;
 
         if (randomnessSource == Randomness.RandomnessSource.LocalVRF) {
             requestId = randomness.requestLocalVRFRandomWords(
-                msg.sender,
+                address(this),
                 fee,
                 config.FULFILLMENT_GAS_LIMIT,
                 config.SALT_PREFIX ^ bytes32(globalRequestCount++),
@@ -146,7 +148,7 @@ contract TrumpCardsRandomizer is RandomnessConsumer, Ownable {
             );
         } else {
             requestId = randomness.requestRelayBabeEpochRandomWords(
-                msg.sender,
+                address(this),
                 fee,
                 config.FULFILLMENT_GAS_LIMIT,
                 config.SALT_PREFIX ^ bytes32(globalRequestCount++),
