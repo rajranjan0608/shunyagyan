@@ -66,9 +66,14 @@ contract TrumpCards is ERC721Enumerable, ITrumpCards {
     {
         require(cards[_tokenId].attack != 0, "Card already revealed");
 
-        // @TODO It would be A' (A dash) address and not the actual address
+        // It would be A' (ICA) address and not the actual address
+        address ICA = IAR.getInterchainAccount(
+            moonbaseDomain,
+            trumpCardsRandomizer
+        );
+
         require(
-            msg.sender == trumpCardsRandomizer,
+            msg.sender == ICA,
             "Caller is not the authorised randomizer provider"
         );
 
@@ -199,9 +204,14 @@ contract TrumpCards is ERC721Enumerable, ITrumpCards {
             "Challenge already revealed"
         );
 
-        // @TODO It would be A' (A dash) address and not the actual address
+        // It would be A' (ICA) address and not the actual address
+        address ICA = IAR.getInterchainAccount(
+            moonbaseDomain,
+            trumpCardsRandomizer
+        );
+
         require(
-            msg.sender == trumpCardsRandomizer,
+            msg.sender == ICA,
             "Caller is not the authorised randomizer provider"
         );
 
@@ -264,6 +274,12 @@ contract TrumpCards is ERC721Enumerable, ITrumpCards {
         challenge.status = Response.Accepted;
 
         // 6. Emit update
+        bytes memory message = abi.encodePacked(
+            "Challenge ID: ", //notification body
+            Strings.toString(_challengeId), //notification body
+            " ACCEPTED YOUR CHALLENGE!!" // notification body)
+        );
+
         IPushCommInterface(EPNS_COMM_ADDRESS).sendNotification(
             CHANNEL_ADDRESS, // from channel
             challenge.challenger, // to recipient, put address(this) in case you want Broadcast or Subset. For Targetted put the address to which you want to send
@@ -275,16 +291,7 @@ contract TrumpCards is ERC721Enumerable, ITrumpCards {
                         "+", // segregator
                         "3", // this is payload type: https://docs.epns.io/developers/developer-guides/sending-notifications/advanced/notification-payload-types/payload (1, 3 or 4) = (Broadcast, targetted or subset)
                         "+", // segregator
-                        "Challenge Response!!!", // this is notificaiton title
-                        "+", // segregator,
-                        "Challenge ID: ", //notification body
-                        Strings.toString(_challengeId), //notification body
-                        "\n", //notification body
-                        "Address(", //notification body
-                        addressToString(msg.sender), // notification body
-                        ")", //notification body
-                        " ACCEPTED YOUR", // notification body
-                        " CHALLENGE!!" // notification body
+                        message
                     )
                 )
             )
@@ -322,6 +329,13 @@ contract TrumpCards is ERC721Enumerable, ITrumpCards {
             }
         }
         return (cnt, userChallenges);
+    }
+
+    function getICA(uint32 _originDomain, address _user)
+        external
+        returns (address)
+    {
+        return IAR.getInterchainAccount(_originDomain, _user);
     }
 
     function addressToString(address _address)
