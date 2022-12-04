@@ -1,18 +1,20 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.4;
+pragma solidity ^0.8.14;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "./IPushCommInterface.sol";
 import "./ITrumpCards.sol";
+import "./IInterchainAccountRouter.sol";
+import "./ITrumpCardsRandomizer.sol";
+
+uint32 constant moonbaseDomain = 0x6d6f2d61;
+
+// consistent across all chains
+address constant icaRouter = 0xc011170d9795a7a2d065E384EAd1CA3394A7d35E;
 
 contract TrumpCards is ERC721Enumerable, ITrumpCards {
-    struct Attributes {
-        uint256 tokenId;
-        uint256 attack;
-        uint256 defense;
-        uint256 stamina;
-        // uint8 network;
-    }
+    IInterchainAccountRouter public IAR = IInterchainAccountRouter(icaRouter);
+    address public trumpCardsRandomizer;
 
     mapping(uint256 => Attributes) public cards;
     mapping(uint256 => Challenge) public challenges;
@@ -23,21 +25,71 @@ contract TrumpCards is ERC721Enumerable, ITrumpCards {
     address public EPNS_COMM_ADDRESS =
         0xb3971BCef2D791bc4027BbfedFb47319A4AAaaAa; // EPNS communication contract address, polygon mumbai
 
-    constructor() ERC721("TrumpCards", "TCRD") {}
+    constructor(address _trumpCardsRandomizer) ERC721("TrumpCards", "TCRD") {
+        trumpCardsRandomizer = _trumpCardsRandomizer;
+    }
 
-    function mint() external returns (uint256) {
-        uint256 _id = super.totalSupply();
+    function reserveTokenId() external returns (uint256) {
+        uint256 tokenId = totalSupply();
+        _mint(msg.sender, tokenId);
 
-        cards[_id] = _generateCardAttr(_id);
-        _mint(msg.sender, _id);
-        // Emit card details
-        return _id;
+        IAR.dispatch(
+            moonbaseDomain,
+            trumpCardsRandomizer,
+            abi.encodeCall(
+                ITrumpCardsRandomizer.initiateRandomForMint,
+                (tokenId)
+            )
+        );
+
+        return tokenId;
+    }
+
+    function unpackCard(uint256 _tokenId) external {
+        // 1. Check tokenId exists
+        require(_exists(_tokenId), "Invalid tokenId");
+
+        // 2. Sender is the owner
+        require(msg.sender == ownerOf(_tokenId), "Not Authorised");
+
+        // 3. Call Randomizer' fulfillMintRequest
+        IAR.dispatch(
+            moonbaseDomain,
+            trumpCardsRandomizer,
+            abi.encodeCall(ITrumpCardsRandomizer.fulfillMintRequest, (_tokenId))
+        );
+    }
+
+    function revealCardAttributes(uint256 _tokenId, uint256 rand)
+        external
+        returns (Attributes memory)
+    {
+        require(cards[_tokenId].attack != 0, "Card already revealed");
+
+        // @TODO It would be A' (A dash) address and not the actual address
+        require(
+            msg.sender == trumpCardsRandomizer,
+            "Caller is not the authorised randomizer provider"
+        );
+
+        uint256 attack = (rand >> 128) % 1000;
+        uint256 defense = (rand / (1 << 128)) % 1000;
+        uint256 stamina = (attack ^ defense) % 1000;
+
+        cards[_tokenId] = Attributes(
+            _tokenId,
+            attack + 1,
+            defense + 1,
+            stamina + 1
+        );
+        return cards[_tokenId];
     }
 
     function challengeUser(address _user) external {
         require(msg.sender != _user, "You cannot challenge self");
 
-        uint256 challengeId = totalChallenges;
+        uint256 challengeId = totalChallenges++;
+
         Challenge memory challenge = Challenge(
             msg.sender,
             _user,
@@ -47,8 +99,17 @@ contract TrumpCards is ERC721Enumerable, ITrumpCards {
             0,
             address(0)
         );
-
         challenges[challengeId] = challenge;
+
+        // Call initiateRandomForChallenge
+        IAR.dispatch(
+            moonbaseDomain,
+            trumpCardsRandomizer,
+            abi.encodeCall(
+                ITrumpCardsRandomizer.initiateRandomForChallenge,
+                (challengeId)
+            )
+        );
 
         // Emit Push event to alert opponent
         IPushCommInterface(EPNS_COMM_ADDRESS).sendNotification(
@@ -78,10 +139,7 @@ contract TrumpCards is ERC721Enumerable, ITrumpCards {
         );
     }
 
-    function respond(uint256 _challengeId, bool _res)
-        external
-        returns (Challenge memory)
-    {
+    function respond(uint256 _challengeId, bool _res) external {
         Challenge storage challenge = challenges[_challengeId];
 
         require(challenge.opponent == msg.sender, "Not Authorised");
@@ -118,41 +176,93 @@ contract TrumpCards is ERC721Enumerable, ITrumpCards {
                     )
                 )
             );
-            return challenge;
         }
 
-        uint256 token1;
-        uint256 token2;
-        uint8 attr;
+        // Call fulfillChallengeRequest
+        IAR.dispatch(
+            moonbaseDomain,
+            trumpCardsRandomizer,
+            abi.encodeCall(
+                ITrumpCardsRandomizer.fulfillChallengeRequest,
+                (_challengeId)
+            )
+        );
+    }
 
-        (token1, token2, attr) = _selectCards(_challengeId);
+    function revealChallengeResults(uint256 _challengeId, uint256 rand)
+        external
+        returns (Challenge memory)
+    {
+        require(
+            challenges[_challengeId].status == Response.Pending,
+            "Challenge already revealed"
+        );
 
-        challenge.challengerCard = token1;
-        challenge.opponentCard = token2;
-        challenge.attrCalled = attr;
+        // @TODO It would be A' (A dash) address and not the actual address
+        require(
+            msg.sender == trumpCardsRandomizer,
+            "Caller is not the authorised randomizer provider"
+        );
 
-        if (attr == 0) {
-            if (cards[token1].attack > cards[token2].attack) {
+        Challenge storage challenge = challenges[_challengeId];
+
+        // 2. Select nft index from challengers' NFT and return its TokenId
+        address challenger = challenge.challenger;
+        require(
+            super.balanceOf(challenger) >= 2,
+            "Challenger has less than 2 NFT. Need alteast two to play game"
+        );
+
+        uint256 index1 = (rand >> 128) % balanceOf(challenger);
+        uint256 challengerCard = tokenOfOwnerByIndex(challenger, index1);
+
+        // 3. Select nft index from opponents' NFT and return its TokenId
+        address opponent = challenge.opponent;
+        require(
+            super.balanceOf(opponent) >= 2,
+            "Opponent has less than 2 NFT. Need alteast two to play game"
+        );
+
+        uint256 index2 = (rand / (1 << 128)) % balanceOf(opponent);
+        uint256 opponentCard = tokenOfOwnerByIndex(opponent, index1);
+
+        // 4. Select attribute to decide winner
+        uint8 attrCalled = uint8((index1 ^ index2) % 3);
+
+        // 5. Find winner & update stats
+        challenge.challengerCard = challengerCard;
+        challenge.opponentCard = opponentCard;
+        challenge.attrCalled = attrCalled;
+
+        if (attrCalled == 0) {
+            if (cards[challengerCard].attack > cards[opponentCard].attack) {
                 challenge.winner = challenge.challenger;
-            } else if (cards[token1].attack < cards[token2].attack) {
+            } else if (
+                cards[challengerCard].attack < cards[opponentCard].attack
+            ) {
                 challenge.winner = challenge.opponent;
             }
-        } else if (attr == 1) {
-            if (cards[token1].defense > cards[token2].defense) {
+        } else if (attrCalled == 1) {
+            if (cards[challengerCard].defense > cards[opponentCard].defense) {
                 challenge.winner = challenge.challenger;
-            } else if (cards[token1].defense < cards[token2].defense) {
+            } else if (
+                cards[challengerCard].defense < cards[opponentCard].defense
+            ) {
                 challenge.winner = challenge.opponent;
             }
         } else {
-            if (cards[token1].stamina > cards[token2].stamina) {
+            if (cards[challengerCard].stamina > cards[opponentCard].stamina) {
                 challenge.winner = challenge.challenger;
-            } else if (cards[token1].stamina < cards[token2].stamina) {
+            } else if (
+                cards[challengerCard].stamina < cards[opponentCard].stamina
+            ) {
                 challenge.winner = challenge.opponent;
             }
         }
 
         challenge.status = Response.Accepted;
-        // Emit update
+
+        // 6. Emit update
         IPushCommInterface(EPNS_COMM_ADDRESS).sendNotification(
             CHANNEL_ADDRESS, // from channel
             challenge.challenger, // to recipient, put address(this) in case you want Broadcast or Subset. For Targetted put the address to which you want to send
@@ -178,6 +288,7 @@ contract TrumpCards is ERC721Enumerable, ITrumpCards {
                 )
             )
         );
+
         return challenge;
     }
 
@@ -210,47 +321,6 @@ contract TrumpCards is ERC721Enumerable, ITrumpCards {
             }
         }
         return (cnt, userChallenges);
-    }
-
-    function _generateCardAttr(uint256 _id)
-        internal
-        pure
-        returns (Attributes memory)
-    {
-        // Call random() from our VRF contract on Polygon
-        return Attributes(_id, 1, 2, 3);
-    }
-
-    function _selectCards(uint256 _challengeId)
-        internal
-        view
-        returns (
-            uint256,
-            uint256,
-            uint8
-        )
-    {
-        Challenge storage challenge = challenges[_challengeId];
-
-        // 1. Obtain random seed
-
-        // 2. Select nft index from challengers' NFT and return its TokenId
-        address challenger = challenge.challenger;
-        require(
-            super.balanceOf(challenger) >= 2,
-            "Challenger has less than 2 NFT. Need alteast two to play game"
-        );
-
-        // 3. Select nft index from opponents' NFT and return its TokenId
-        address opponent = challenge.opponent;
-        require(
-            super.balanceOf(opponent) >= 2,
-            "Opponent has less than 2 NFT. Need alteast two to play game"
-        );
-
-        // 4. Select attribute to decide winner
-
-        return (0, 0, 0);
     }
 
     function addressToString(address _address)
