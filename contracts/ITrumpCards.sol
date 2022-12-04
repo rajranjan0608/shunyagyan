@@ -8,6 +8,7 @@ enum Response {
 }
 
 struct Challenge {
+    uint256 challengeId;
     address challenger;
     address opponent;
     Response status;

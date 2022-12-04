@@ -91,6 +91,7 @@ contract TrumpCards is ERC721Enumerable, ITrumpCards {
         uint256 challengeId = totalChallenges++;
 
         Challenge memory challenge = Challenge(
+            challengeId,
             msg.sender,
             _user,
             Response.Pending,
