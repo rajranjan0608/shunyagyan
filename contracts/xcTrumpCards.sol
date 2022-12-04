@@ -17,11 +17,27 @@ contract xcTrumpCards {
         trumpCardsAddress = _trumpCardsAddress;
     }
 
-    function mint() external {
+    function reserveTokenId() external {
         IAR.dispatch(
             mumbaiDomain,
             trumpCardsAddress,
-            abi.encodeCall(ITrumpCards.mint, ())
+            abi.encodeCall(ITrumpCards.reserveTokenId, ())
+        );
+    }
+
+    function unpackCard(uint256 _tokenId) external {
+        IAR.dispatch(
+            mumbaiDomain,
+            trumpCardsAddress,
+            abi.encodeCall(ITrumpCards.unpackCard, (_tokenId))
+        );
+    }
+
+    function revealCardAttributes(uint256 _tokenId, uint256 rand) external {
+        IAR.dispatch(
+            mumbaiDomain,
+            trumpCardsAddress,
+            abi.encodeCall(ITrumpCards.revealCardAttributes, (_tokenId, rand))
         );
     }
 
@@ -40,6 +56,19 @@ contract xcTrumpCards {
             mumbaiDomain,
             trumpCardsAddress,
             abi.encodeCall(ITrumpCards.respond, (_challengeId, _res))
+        );
+    }
+
+    function revealChallengeResults(uint256 _challengeId, uint256 rand)
+        external
+    {
+        IAR.dispatch(
+            mumbaiDomain,
+            trumpCardsAddress,
+            abi.encodeCall(
+                ITrumpCards.revealChallengeResults,
+                (_challengeId, rand)
+            )
         );
     }
 }
