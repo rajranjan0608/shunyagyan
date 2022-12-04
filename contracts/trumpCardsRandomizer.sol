@@ -3,8 +3,18 @@ pragma solidity ^0.8.14;
 
 import "./Randomness.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "./IInterchainAccountRouter.sol";
+import "./ITrumpCards.sol";
+
+uint32 constant mumbaiDomain = 80001;
+
+// consistent across all chains
+address constant icaRouter = 0xc011170d9795a7a2d065E384EAd1CA3394A7d35E;
 
 contract TrumpCardsRandomizer is RandomnessConsumer, Ownable {
+    address public trumpCardsAddress;
+    IInterchainAccountRouter public IAR = IInterchainAccountRouter(icaRouter);
+
     /// @notice The Randomness Precompile Interface
     Randomness public randomness =
         Randomness(0x0000000000000000000000000000000000000809);
@@ -35,6 +45,10 @@ contract TrumpCardsRandomizer is RandomnessConsumer, Ownable {
         config.FULFILLMENT_GAS_LIMIT = 100000;
         config.NUMBER_OF_WORDS = 1;
         config.VRF_BLOCKS_DELAY = MIN_VRF_BLOCKS_DELAY;
+    }
+
+    function setTrumpCardsAddress(address addr) external onlyOwner {
+        trumpCardsAddress = addr;
     }
 
     function updateConfig(
@@ -70,6 +84,15 @@ contract TrumpCardsRandomizer is RandomnessConsumer, Ownable {
         randomness.fulfillRequest(requestId);
 
         // Call TrumpCards' revealCardAttributes()
+        IAR.dispatch(
+            mumbaiDomain,
+            trumpCardsAddress,
+            abi.encodeCall(
+                ITrumpCards.revealCardAttributes,
+                (_tokenId, requestIdToRandom[requestId])
+            )
+        );
+
         return requestIdToRandom[requestId];
     }
 
@@ -85,6 +108,14 @@ contract TrumpCardsRandomizer is RandomnessConsumer, Ownable {
         randomness.fulfillRequest(requestId);
 
         // Call TrumpCards' revealChallengeResults()
+        IAR.dispatch(
+            mumbaiDomain,
+            trumpCardsAddress,
+            abi.encodeCall(
+                ITrumpCards.revealCardAttributes,
+                (_challengeId, requestIdToRandom[requestId])
+            )
+        );
 
         return requestIdToRandom[requestId];
     }
