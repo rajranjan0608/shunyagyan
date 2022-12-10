@@ -9,6 +9,6 @@ interface IInterchainAccountRouter {
     ) external;
 
     function getInterchainAccount(uint32 _originDomain, address _sender)
-        external
+        external view
         returns (address);
 }

@@ -79,7 +79,7 @@ contract TrumpCards is ERC721Enumerable, ITrumpCards {
         );
 
         uint256 attack = (rand >> 128);
-        uint256 defense = (rand / (1 << 128));
+        uint256 defense = (rand % (1 << 128));
         uint256 stamina = (attack ^ defense);
 
         cards[_tokenId] = Attributes(
@@ -235,7 +235,7 @@ contract TrumpCards is ERC721Enumerable, ITrumpCards {
             "Opponent has less than 2 NFT. Need alteast two to play game"
         );
 
-        uint256 index2 = (rand / (1 << 128)) % balanceOf(opponent);
+        uint256 index2 = (rand % (1 << 128)) % balanceOf(opponent);
         uint256 opponentCard = tokenOfOwnerByIndex(opponent, index1);
 
         // 4. Select attribute to decide winner
@@ -333,7 +333,7 @@ contract TrumpCards is ERC721Enumerable, ITrumpCards {
     }
 
     function getICA(uint32 _originDomain, address _user)
-        external
+        external view
         returns (address)
     {
         return IAR.getInterchainAccount(_originDomain, _user);
